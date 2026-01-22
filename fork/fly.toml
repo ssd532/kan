@@ -1,0 +1,22 @@
+app = 'kan-app'
+primary_region = 'sin'
+
+[build]
+  image = 'ghcr.io/kanbn/kan:latest'
+
+[env]
+  NEXT_PUBLIC_BASE_URL = 'https://kan-app.fly.dev'
+  NEXT_PUBLIC_ALLOW_CREDENTIALS = 'true'
+  NEXT_PUBLIC_DISABLE_EMAIL = 'true'
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
