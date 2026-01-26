@@ -25,7 +25,6 @@ import PatternedBackground from "~/components/PatternedBackground";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
 import { Tooltip } from "~/components/Tooltip";
 import { EditYouTubeModal } from "~/components/YouTubeEmbed/EditYouTubeModal";
-import { useAutoScrollOnDrag } from "~/hooks/useAutoScrollOnDrag";
 import { useDragToScroll } from "~/hooks/useDragToScroll";
 import { useKeyboardShortcut } from "~/providers/keyboard-shortcuts";
 import { useModal } from "~/providers/modal";
@@ -63,11 +62,6 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
     enabled: true,
     direction: "horizontal",
   });
-
-  const { handleDragStart, handleDragEnd: autoScrollDragEnd } =
-    useAutoScrollOnDrag({
-      scrollContainerRef: scrollRef,
-    });
 
   const { tooltipContent: createListShortcutTooltipContent } =
     useKeyboardShortcut({
@@ -283,11 +277,6 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
     }
   };
 
-  const onDragEndWithAutoScroll = (result: DropResult): void => {
-    autoScrollDragEnd();
-    onDragEnd(result);
-  };
-
   const renderModalContent = () => {
     return (
       <>
@@ -496,43 +485,40 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
           </div>
         </div>
 
-        <div
-          ref={scrollRef}
-          onMouseDown={onMouseDown}
-          className={`scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300`}
-        >
-          {isLoading ? (
-            <div className="ml-[2rem] flex">
-              <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
-              <div className="0 mr-5 h-[275px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
-              <div className="0 mr-5 h-[375px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
-            </div>
-          ) : boardData ? (
-            <>
-              {boardData.lists.length === 0 ? (
-                <div className="z-10 flex h-full w-full flex-col items-center justify-center space-y-8 pb-[150px]">
-                  <div className="flex flex-col items-center">
-                    <HiOutlineSquare3Stack3D className="h-10 w-10 text-light-800 dark:text-dark-800" />
-                    <p className="mb-2 mt-4 text-[14px] font-bold text-light-1000 dark:text-dark-950">
-                      {t`No lists`}
-                    </p>
-                    <p className="text-[14px] text-light-900 dark:text-dark-900">
-                      {t`Get started by creating a new list`}
-                    </p>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div
+            ref={scrollRef}
+            onMouseDown={onMouseDown}
+            className={`scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300`}
+          >
+            {isLoading ? (
+              <div className="ml-[2rem] flex">
+                <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
+                <div className="0 mr-5 h-[275px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
+                <div className="0 mr-5 h-[375px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
+              </div>
+            ) : boardData ? (
+              <>
+                {boardData.lists.length === 0 ? (
+                  <div className="z-10 flex h-full w-full flex-col items-center justify-center space-y-8 pb-[150px]">
+                    <div className="flex flex-col items-center">
+                      <HiOutlineSquare3Stack3D className="h-10 w-10 text-light-800 dark:text-dark-800" />
+                      <p className="mb-2 mt-4 text-[14px] font-bold text-light-1000 dark:text-dark-950">
+                        {t`No lists`}
+                      </p>
+                      <p className="text-[14px] text-light-900 dark:text-dark-900">
+                        {t`Get started by creating a new list`}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (boardId) openNewListForm(boardId);
+                      }}
+                    >
+                      {t`Create new list`}
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => {
-                      if (boardId) openNewListForm(boardId);
-                    }}
-                  >
-                    {t`Create new list`}
-                  </Button>
-                </div>
-              ) : (
-                <DragDropContext
-                  onDragStart={handleDragStart}
-                  onDragEnd={onDragEndWithAutoScroll}
-                >
+                ) : (
                   <Droppable
                     droppableId="all-lists"
                     direction="horizontal"
@@ -624,11 +610,11 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
                       </div>
                     )}
                   </Droppable>
-                </DragDropContext>
-              )}
-            </>
-          ) : null}
-        </div>
+                )}
+              </>
+            ) : null}
+          </div>
+        </DragDropContext>
         {renderModalContent()}
       </div>
     </>
