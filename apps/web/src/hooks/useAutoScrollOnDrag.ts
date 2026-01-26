@@ -30,27 +30,14 @@ export function useAutoScrollOnDrag({
     const distanceFromLeft = x - rect.left;
     const distanceFromRight = rect.right - x;
 
-    let didScroll = false;
-
     if (distanceFromLeft < edgeThreshold && distanceFromLeft > 0) {
       const intensity = 1 - distanceFromLeft / edgeThreshold;
       container.scrollLeft -= maxScrollSpeed * intensity;
-      didScroll = true;
     }
 
     if (distanceFromRight < edgeThreshold && distanceFromRight > 0) {
       const intensity = 1 - distanceFromRight / edgeThreshold;
       container.scrollLeft += maxScrollSpeed * intensity;
-      didScroll = true;
-    }
-
-    if (didScroll) {
-      container.dispatchEvent(new Event("scroll", { bubbles: true }));
-
-      const droppables = container.querySelectorAll("[data-rbd-droppable-id]");
-      droppables.forEach((el) => {
-        el.dispatchEvent(new Event("scroll", { bubbles: false }));
-      });
     }
 
     animationFrameId.current = requestAnimationFrame(scrollLoop);
