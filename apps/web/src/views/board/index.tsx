@@ -25,6 +25,7 @@ import PatternedBackground from "~/components/PatternedBackground";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
 import { Tooltip } from "~/components/Tooltip";
 import { EditYouTubeModal } from "~/components/YouTubeEmbed/EditYouTubeModal";
+import { useAutoScrollOnDrag } from "~/hooks/useAutoScrollOnDrag";
 import { useDragToScroll } from "~/hooks/useDragToScroll";
 import { useKeyboardShortcut } from "~/providers/keyboard-shortcuts";
 import { useModal } from "~/providers/modal";
@@ -62,6 +63,11 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
     enabled: true,
     direction: "horizontal",
   });
+
+  const { handleDragStart, handleDragEnd: autoScrollDragEnd } =
+    useAutoScrollOnDrag({
+      scrollContainerRef: scrollRef,
+    });
 
   const { tooltipContent: createListShortcutTooltipContent } =
     useKeyboardShortcut({
@@ -275,6 +281,11 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
         index: destination.index,
       });
     }
+  };
+
+  const onDragEndWithAutoScroll = (result: DropResult): void => {
+    autoScrollDragEnd();
+    onDragEnd(result);
   };
 
   const renderModalContent = () => {
@@ -518,7 +529,10 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
                   </Button>
                 </div>
               ) : (
-                <DragDropContext onDragEnd={onDragEnd}>
+                <DragDropContext
+                  onDragStart={handleDragStart}
+                  onDragEnd={onDragEndWithAutoScroll}
+                >
                   <Droppable
                     droppableId="all-lists"
                     direction="horizontal"
